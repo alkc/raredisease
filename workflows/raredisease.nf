@@ -334,242 +334,242 @@ workflow RAREDISEASE {
     )
     ch_versions = ch_versions.mix(QC_BAM.out.versions)
 
-    //
-    // EXPANSIONHUNTER AND STRANGER
-    //
-    CALL_REPEAT_EXPANSIONS (
-        ch_mapped.genome_bam_bai,
-        ch_variant_catalog,
-        ch_case_info,
-        ch_genome_fasta,
-        ch_genome_fai
-    )
-    ch_versions = ch_versions.mix(CALL_REPEAT_EXPANSIONS.out.versions)
+    // //
+    // // EXPANSIONHUNTER AND STRANGER
+    // //
+    // CALL_REPEAT_EXPANSIONS (
+    //     ch_mapped.genome_bam_bai,
+    //     ch_variant_catalog,
+    //     ch_case_info,
+    //     ch_genome_fasta,
+    //     ch_genome_fai
+    // )
+    // ch_versions = ch_versions.mix(CALL_REPEAT_EXPANSIONS.out.versions)
 
-    //
-    // SNV CALLING
-    //
-    CALL_SNV (
-        ch_mapped.genome_bam_bai,
-        ch_mapped.mt_bam_bai,
-        ch_mapped.mtshift_bam_bai,
-        ch_genome_fasta,
-        ch_genome_fai,
-        ch_genome_dictionary,
-        ch_mt_intervals,
-        ch_mtshift_fasta,
-        ch_mtshift_fai,
-        ch_mtshift_dictionary,
-        ch_mtshift_intervals,
-        ch_mtshift_backchain,
-        ch_dbsnp,
-        ch_dbsnp_tbi,
-        ch_call_interval,
-        ch_ml_model,
-        ch_case_info,
-        Channel.value(params.sentieon_dnascope_pcr_indel_model)
-    )
-    ch_versions = ch_versions.mix(CALL_SNV.out.versions)
+    // //
+    // // SNV CALLING
+    // //
+    // CALL_SNV (
+    //     ch_mapped.genome_bam_bai,
+    //     ch_mapped.mt_bam_bai,
+    //     ch_mapped.mtshift_bam_bai,
+    //     ch_genome_fasta,
+    //     ch_genome_fai,
+    //     ch_genome_dictionary,
+    //     ch_mt_intervals,
+    //     ch_mtshift_fasta,
+    //     ch_mtshift_fai,
+    //     ch_mtshift_dictionary,
+    //     ch_mtshift_intervals,
+    //     ch_mtshift_backchain,
+    //     ch_dbsnp,
+    //     ch_dbsnp_tbi,
+    //     ch_call_interval,
+    //     ch_ml_model,
+    //     ch_case_info,
+    //     Channel.value(params.sentieon_dnascope_pcr_indel_model)
+    // )
+    // ch_versions = ch_versions.mix(CALL_SNV.out.versions)
 
-    //
-    // SV CALLING
-    //
-    CALL_STRUCTURAL_VARIANTS (
-        ch_mapped.genome_marked_bam,
-        ch_mapped.genome_marked_bai,
-        ch_mapped.genome_bam_bai,
-        ch_mapped.mt_bam_bai,
-        ch_mapped.mtshift_bam_bai,
-        ch_genome_bwaindex,
-        ch_genome_fasta,
-        ch_genome_fai,
-        ch_mtshift_fasta,
-        ch_case_info,
-        ch_target_bed,
-        ch_genome_dictionary,
-        ch_svcaller_priority,
-        ch_readcount_intervals,
-        ch_ploidy_model,
-        ch_gcnvcaller_model
-    )
-    ch_versions = ch_versions.mix(CALL_STRUCTURAL_VARIANTS.out.versions)
+    // //
+    // // SV CALLING
+    // //
+    // CALL_STRUCTURAL_VARIANTS (
+    //     ch_mapped.genome_marked_bam,
+    //     ch_mapped.genome_marked_bai,
+    //     ch_mapped.genome_bam_bai,
+    //     ch_mapped.mt_bam_bai,
+    //     ch_mapped.mtshift_bam_bai,
+    //     ch_genome_bwaindex,
+    //     ch_genome_fasta,
+    //     ch_genome_fai,
+    //     ch_mtshift_fasta,
+    //     ch_case_info,
+    //     ch_target_bed,
+    //     ch_genome_dictionary,
+    //     ch_svcaller_priority,
+    //     ch_readcount_intervals,
+    //     ch_ploidy_model,
+    //     ch_gcnvcaller_model
+    // )
+    // ch_versions = ch_versions.mix(CALL_STRUCTURAL_VARIANTS.out.versions)
 
-    //
-    // ANNOTATE STRUCTURAL VARIANTS
-    //
-    if (!params.skip_sv_annotation) {
-        ANNOTATE_STRUCTURAL_VARIANTS (
-            CALL_STRUCTURAL_VARIANTS.out.vcf,
-            params.svdb_query_dbs,
-            params.genome,
-            params.vep_cache_version,
-            ch_vep_cache,
-            ch_genome_fasta,
-            ch_genome_dictionary
-        ).set {ch_sv_annotate}
-        ch_versions = ch_versions.mix(ch_sv_annotate.versions)
+    // //
+    // // ANNOTATE STRUCTURAL VARIANTS
+    // //
+    // if (!params.skip_sv_annotation) {
+    //     ANNOTATE_STRUCTURAL_VARIANTS (
+    //         CALL_STRUCTURAL_VARIANTS.out.vcf,
+    //         params.svdb_query_dbs,
+    //         params.genome,
+    //         params.vep_cache_version,
+    //         ch_vep_cache,
+    //         ch_genome_fasta,
+    //         ch_genome_dictionary
+    //     ).set {ch_sv_annotate}
+    //     ch_versions = ch_versions.mix(ch_sv_annotate.versions)
 
-        ANN_CSQ_PLI_SV (
-            ch_sv_annotate.vcf_ann,
-            ch_variant_consequences
-        )
-        ch_versions = ch_versions.mix(ANN_CSQ_PLI_SV.out.versions)
+    //     ANN_CSQ_PLI_SV (
+    //         ch_sv_annotate.vcf_ann,
+    //         ch_variant_consequences
+    //     )
+    //     ch_versions = ch_versions.mix(ANN_CSQ_PLI_SV.out.versions)
 
-        RANK_VARIANTS_SV (
-            ANN_CSQ_PLI_SV.out.vcf_ann,
-            ch_pedfile,
-            ch_reduced_penetrance,
-            ch_score_config_sv
-        )
-        ch_versions = ch_versions.mix(RANK_VARIANTS_SV.out.versions)
+    //     RANK_VARIANTS_SV (
+    //         ANN_CSQ_PLI_SV.out.vcf_ann,
+    //         ch_pedfile,
+    //         ch_reduced_penetrance,
+    //         ch_score_config_sv
+    //     )
+    //     ch_versions = ch_versions.mix(RANK_VARIANTS_SV.out.versions)
 
-        FILTERVEP_SV(
-            RANK_VARIANTS_SV.out.vcf,
-            ch_vep_filters
-        )
-        ch_versions = ch_versions.mix(FILTERVEP_SV.out.versions)
+    //     FILTERVEP_SV(
+    //         RANK_VARIANTS_SV.out.vcf,
+    //         ch_vep_filters
+    //     )
+    //     ch_versions = ch_versions.mix(FILTERVEP_SV.out.versions)
 
-        BGZIPTABIX_SV(FILTERVEP_SV.out.output)
-        ch_versions = ch_versions.mix(BGZIPTABIX_SV.out.versions)
+    //     BGZIPTABIX_SV(FILTERVEP_SV.out.output)
+    //     ch_versions = ch_versions.mix(BGZIPTABIX_SV.out.versions)
 
-    }
+    // }
 
-    //
-    // ANNOTATE GENOME SNVs
-    //
-    if (!params.skip_snv_annotation) {
+    // //
+    // // ANNOTATE GENOME SNVs
+    // //
+    // if (!params.skip_snv_annotation) {
 
-        ANNOTATE_GENOME_SNVS (
-            CALL_SNV.out.genome_vcf_tabix,
-            params.analysis_type,
-            ch_cadd_header,
-            ch_cadd_resources,
-            ch_vcfanno_resources,
-            ch_vcfanno_lua,
-            ch_vcfanno_toml,
-            params.genome,
-            params.vep_cache_version,
-            ch_vep_cache,
-            ch_genome_fasta,
-            ch_gnomad_af,
-            ch_scatter_split_intervals
-        ).set {ch_snv_annotate}
-        ch_versions = ch_versions.mix(ch_snv_annotate.versions)
+    //     ANNOTATE_GENOME_SNVS (
+    //         CALL_SNV.out.genome_vcf_tabix,
+    //         params.analysis_type,
+    //         ch_cadd_header,
+    //         ch_cadd_resources,
+    //         ch_vcfanno_resources,
+    //         ch_vcfanno_lua,
+    //         ch_vcfanno_toml,
+    //         params.genome,
+    //         params.vep_cache_version,
+    //         ch_vep_cache,
+    //         ch_genome_fasta,
+    //         ch_gnomad_af,
+    //         ch_scatter_split_intervals
+    //     ).set {ch_snv_annotate}
+    //     ch_versions = ch_versions.mix(ch_snv_annotate.versions)
 
-        ch_snv_annotate = ANNOTATE_GENOME_SNVS.out.vcf_ann
+    //     ch_snv_annotate = ANNOTATE_GENOME_SNVS.out.vcf_ann
 
-        ANN_CSQ_PLI_SNV (
-            ch_snv_annotate,
-            ch_variant_consequences
-        )
-        ch_versions = ch_versions.mix(ANN_CSQ_PLI_SNV.out.versions)
+    //     ANN_CSQ_PLI_SNV (
+    //         ch_snv_annotate,
+    //         ch_variant_consequences
+    //     )
+    //     ch_versions = ch_versions.mix(ANN_CSQ_PLI_SNV.out.versions)
 
-        RANK_VARIANTS_SNV (
-            ANN_CSQ_PLI_SNV.out.vcf_ann,
-            ch_pedfile,
-            ch_reduced_penetrance,
-            ch_score_config_snv
-        )
-        ch_versions = ch_versions.mix(RANK_VARIANTS_SNV.out.versions)
+    //     RANK_VARIANTS_SNV (
+    //         ANN_CSQ_PLI_SNV.out.vcf_ann,
+    //         ch_pedfile,
+    //         ch_reduced_penetrance,
+    //         ch_score_config_snv
+    //     )
+    //     ch_versions = ch_versions.mix(RANK_VARIANTS_SNV.out.versions)
 
-        FILTERVEP_SNV(
-            RANK_VARIANTS_SNV.out.vcf,
-            ch_vep_filters
-        )
-        ch_versions = ch_versions.mix(FILTERVEP_SNV.out.versions)
+    //     FILTERVEP_SNV(
+    //         RANK_VARIANTS_SNV.out.vcf,
+    //         ch_vep_filters
+    //     )
+    //     ch_versions = ch_versions.mix(FILTERVEP_SNV.out.versions)
 
-        BGZIPTABIX_SNV(FILTERVEP_SNV.out.output)
-        ch_versions = ch_versions.mix(BGZIPTABIX_SNV.out.versions)
+    //     BGZIPTABIX_SNV(FILTERVEP_SNV.out.output)
+    //     ch_versions = ch_versions.mix(BGZIPTABIX_SNV.out.versions)
 
-    }
+    // }
 
-    //
-    // ANNOTATE MT SNVs
-    //
-    if (!params.skip_mt_annotation) {
+    // //
+    // // ANNOTATE MT SNVs
+    // //
+    // if (!params.skip_mt_annotation) {
 
-        ANNOTATE_MT_SNVS (
-            CALL_SNV.out.mt_vcf,
-            CALL_SNV.out.mt_tabix,
-            ch_cadd_header,
-            ch_cadd_resources,
-            ch_genome_fasta,
-            ch_vcfanno_resources,
-            ch_vcfanno_toml,
-            params.genome,
-            params.vep_cache_version,
-            ch_vep_cache,
-        ).set {ch_mt_annotate}
-        ch_versions = ch_versions.mix(ch_mt_annotate.versions)
+    //     ANNOTATE_MT_SNVS (
+    //         CALL_SNV.out.mt_vcf,
+    //         CALL_SNV.out.mt_tabix,
+    //         ch_cadd_header,
+    //         ch_cadd_resources,
+    //         ch_genome_fasta,
+    //         ch_vcfanno_resources,
+    //         ch_vcfanno_toml,
+    //         params.genome,
+    //         params.vep_cache_version,
+    //         ch_vep_cache,
+    //     ).set {ch_mt_annotate}
+    //     ch_versions = ch_versions.mix(ch_mt_annotate.versions)
 
-        ANN_CSQ_PLI_MT (
-            ch_mt_annotate.vcf_ann,
-            ch_variant_consequences
-        )
-        ch_versions = ch_versions.mix(ANN_CSQ_PLI_MT.out.versions)
+    //     ANN_CSQ_PLI_MT (
+    //         ch_mt_annotate.vcf_ann,
+    //         ch_variant_consequences
+    //     )
+    //     ch_versions = ch_versions.mix(ANN_CSQ_PLI_MT.out.versions)
 
-        RANK_VARIANTS_MT (
-            ANN_CSQ_PLI_MT.out.vcf_ann,
-            ch_pedfile,
-            ch_reduced_penetrance,
-            ch_score_config_mt
-        )
-        ch_versions = ch_versions.mix(RANK_VARIANTS_MT.out.versions)
+    //     RANK_VARIANTS_MT (
+    //         ANN_CSQ_PLI_MT.out.vcf_ann,
+    //         ch_pedfile,
+    //         ch_reduced_penetrance,
+    //         ch_score_config_mt
+    //     )
+    //     ch_versions = ch_versions.mix(RANK_VARIANTS_MT.out.versions)
 
-        FILTERVEP_MT(
-            RANK_VARIANTS_MT.out.vcf,
-            ch_vep_filters
-        )
-        ch_versions = ch_versions.mix(FILTERVEP_MT.out.versions)
+    //     FILTERVEP_MT(
+    //         RANK_VARIANTS_MT.out.vcf,
+    //         ch_vep_filters
+    //     )
+    //     ch_versions = ch_versions.mix(FILTERVEP_MT.out.versions)
 
-        BGZIPTABIX_MT(FILTERVEP_MT.out.output)
-        ch_versions = ch_versions.mix(BGZIPTABIX_MT.out.versions)
+    //     BGZIPTABIX_MT(FILTERVEP_MT.out.output)
+    //     ch_versions = ch_versions.mix(BGZIPTABIX_MT.out.versions)
 
-    }
+    // }
 
-    // STEP 1.7: SMNCOPYNUMBERCALLER
-    ch_mapped.genome_bam_bai
-        .collect{it[1]}
-        .toList()
-        .set { ch_bam_list }
+    // // STEP 1.7: SMNCOPYNUMBERCALLER
+    // ch_mapped.genome_bam_bai
+    //     .collect{it[1]}
+    //     .toList()
+    //     .set { ch_bam_list }
 
-    ch_mapped.genome_bam_bai
-        .collect{it[2]}
-        .toList()
-        .set { ch_bai_list }
+    // ch_mapped.genome_bam_bai
+    //     .collect{it[2]}
+    //     .toList()
+    //     .set { ch_bai_list }
 
-    ch_case_info
-        .combine(ch_bam_list)
-        .combine(ch_bai_list)
-        .set { ch_bams_bais }
+    // ch_case_info
+    //     .combine(ch_bam_list)
+    //     .combine(ch_bai_list)
+    //     .set { ch_bams_bais }
 
-    SMNCOPYNUMBERCALLER (
-        ch_bams_bais
-    )
-    ch_versions = ch_versions.mix(SMNCOPYNUMBERCALLER.out.versions)
+    // SMNCOPYNUMBERCALLER (
+    //     ch_bams_bais
+    // )
+    // ch_versions = ch_versions.mix(SMNCOPYNUMBERCALLER.out.versions)
 
-    // ped correspondence, sex check, ancestry check
-    PEDDY_CHECK (
-        CALL_SNV.out.genome_vcf.join(CALL_SNV.out.genome_tabix, failOnMismatch:true, failOnDuplicate:true),
-        ch_pedfile
-    )
-    ch_versions = ch_versions.mix(PEDDY_CHECK.out.versions)
+    // // ped correspondence, sex check, ancestry check
+    // PEDDY_CHECK (
+    //     CALL_SNV.out.genome_vcf.join(CALL_SNV.out.genome_tabix, failOnMismatch:true, failOnDuplicate:true),
+    //     ch_pedfile
+    // )
+    // ch_versions = ch_versions.mix(PEDDY_CHECK.out.versions)
 
-    // GENS
-    if (params.gens_switch) {
-        GENS (
-            ch_mapped.genome_bam_bai,
-            CALL_SNV.out.vcf,
-            ch_genome_fasta,
-            ch_genome_fai,
-            file(params.gens_interval_list),
-            file(params.gens_pon),
-            file(params.gens_gnomad_pos),
-            ch_case_info,
-            ch_genome_dictionary
-        )
-        ch_versions = ch_versions.mix(GENS.out.versions)
-    }
+    // // GENS
+    // if (params.gens_switch) {
+    //     GENS (
+    //         ch_mapped.genome_bam_bai,
+    //         CALL_SNV.out.vcf,
+    //         ch_genome_fasta,
+    //         ch_genome_fai,
+    //         file(params.gens_interval_list),
+    //         file(params.gens_pon),
+    //         file(params.gens_gnomad_pos),
+    //         ch_case_info,
+    //         ch_genome_dictionary
+    //     )
+    //     ch_versions = ch_versions.mix(GENS.out.versions)
+    // }
 
     //
     // MODULE: Pipeline reporting
@@ -599,8 +599,8 @@ workflow RAREDISEASE {
     ch_multiqc_files = ch_multiqc_files.mix(QC_BAM.out.qualimap_results.map{it[1]}.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(QC_BAM.out.global_dist.map{it[1]}.collect().ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(QC_BAM.out.cov.map{it[1]}.collect().ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PEDDY_CHECK.out.ped.map{it[1]}.collect().ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(PEDDY_CHECK.out.csv.map{it[1]}.collect().ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(PEDDY_CHECK.out.ped.map{it[1]}.collect().ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(PEDDY_CHECK.out.csv.map{it[1]}.collect().ifEmpty([]))
 
 
     MULTIQC (
